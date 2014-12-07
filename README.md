@@ -26,14 +26,14 @@ This Pebble application has for the moment only two files:
 The `main_activity.c` includes the `pebble.h` header and defines the KEYS for our dictionary that we are using to transfer the data from the phone to Pebble. In the following, I will describe this file and it's content.
 
 First of all, we are defining _3_ elements that we are using within the application. Those are one `Window` object and two `TextLayer` objects. Each of them, are defined as pointers of types `Window` and `TextLayer`:
-```
+```c
 static Window *main_window; // Create a new window layer
 static TextLayer *text_layer; // Create a new text layer
 static TextLayer *api_data_text; // Create a new text layer
 ```
 
 As every `C` program, the Pebble WhatchApp has a `main()` function that is called when the program is executed. Our `main()` function consists into 3 function calls that are going to _init_ our variables, get the application into _it's running loop_ while the application is running and another function that _destroys_ our used variables to free up memory. The `main()` function is defined as follows:
-```
+```c
 int main(void){
   init(); // Init everything
   app_event_loop(); // Loop everything (run app and take actions)
@@ -42,7 +42,7 @@ int main(void){
 ```
 
 In our application, on the `init()` function, I am creating a new `Window` object and the two `TextLayer` objects, and configure them with their default values, and also I am adding some of their properties. Also, in the same `init()` function, I am initialising all the required event listeners for the `AppMessage` API from Pebble, to listen for any events that are sending or receiving data. The function definition, along with the description of the code is the following:
-```
+```c
 // Init function
 static void init(){
   // Create new window
@@ -68,7 +68,7 @@ static void init(){
 ```
 
 Instead of instantiating all the elements that are used within the `Window` object, I have attached handlers for when the `Window` loads (is constructed) or unloads (is destructed). This means, that when the window is loaded, I am instantiating all the `TextLayer` objects along with their properties. The handler for instantiating the `Window` is called `main_window_load` and it's defined as follows:
-```
+```c
 static void main_window_load(Window *window){ // Get our pointer to the Window object
   // Create a new text layer and add it's properties
   text_layer = text_layer_create(GRect(0, 0, 144, 28)); // Create a new rectangle shape that starts at 0,0 and has the width of 144PX and height of 28PX
@@ -95,7 +95,7 @@ static void main_window_load(Window *window){ // Get our pointer to the Window o
 The prototype of those functions related to the UI can be found within the Pebble documentation at [Official Pebble Documentation > PEBBLE C > UI](http://developer.getpebble.com/docs/c/group___u_i.html). Every other details about what's happening in that block, can be readed and understood by the comments on each line. 
 
 When a `Window` object is destroyed (when the application closed), our handler for destroying the `Window` object is going to destroy those objects to free up the memory used by the application on the Pebble OS. Thus meaning we need to remove the two layers we've added within this window, in it's window unload handler, as follows:
-```
+```c
 static void main_window_unload(Window *window){
   // Destroy the text layer to free up space
   text_layer_destroy(text_layer);
@@ -107,7 +107,7 @@ The above code clears the memory that was allocated on Pebble.
 
 ###### How does the Pebble app get the data from the phone?
 Eearlier in this description, I've told you that the Pebble WhatchApp is getting the Phone's location and does an AJAX request to get the location name based on the _latitude and longitude_ determined by the phone. In our `init()` function we had the following code that was subscribing some events related to `AppMessage` API:
-```
+```c
 // Init the callbacks for AppMessage API
 app_message_register_inbox_received(inbox_received_callback); // Listen for information received from the phone
 app_message_register_inbox_dropped(inbox_dropped_callback); // Listen for information received from the phone but discarded
@@ -118,7 +118,7 @@ app_message_register_outbox_sent(outbox_sent_callback); // Listen for events tha
 app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 ```
 The `app_message_open` actually opens the connection and attached all those event listeners. At the moment of calling those function, every event triggered is handled by one of the 4 event listeners we have instantiated later on. The only event listener implemented at the moment is the `app_message_register_inbox_received()` and it's handled by the function called `inbox_received_callback`, defined and explained as follows:
-```
+```c
 static void inbox_received_callback(DictionaryIterator *iterator, void *context){
   Tuple *t = dict_read_first(iterator); // Get first dictionary value
   // Create a new buffer for the location string
@@ -148,7 +148,7 @@ This handler get's the dictionary key defined by `#define KEY_APISTRING 0` onto 
 
 All of this happens within the `app_event_loop()` call from our `main()` function. When we leave the application, the `deinit()` function is called. In here, we remove the `Window` object that we have created in the earlier steps:
 
-```
+```c
 static void deinit(){
   // Destroy the main window to free memory on the Pebble watch
   window_destroy(main_window);
@@ -157,13 +157,13 @@ static void deinit(){
 
 ###### Now, how does the phone send us all this information, and how everything is executed between the Pebble WhatchApp and the Phone?
 The JavaScript file `API_calls.js` handles all those steps and comunicates with our `c` app. First, usng the `Pebble` object from the `PebbleJS KIT`, we are setting up an event listener for when the connection between the watch and the phone is ready:
-```
+```javascript
 Pebble.addEventListener('ready', function(ev){ // Initialise the AppMessage event listener for "ready" state
   getLocation(); // When we are ready, request the location
 });
 ```
 When this event is ready, we are calling a function named `geoLocation()` that get's our location from the phone as follows:
-```
+```javascript
 function getLocation(){
   navigator.geolocation.getCurrentPosition( // Get the location from the phone
     locationSuccessCallback, // Set callback for success
@@ -173,7 +173,7 @@ function getLocation(){
 }
 ```
 To make the function more readable, and easy to maintain, instead of using inline functions for the callbacks of `navigator.geolocation.getCurrentPosition` I have created some handler functions that are taking care of the required callbacks: `locationSuccessCallback` and `locationErrorCallback` - their names are very intuitive and I am pretty sure you know what they are doing. Focusing on the `locationSuccessCallback` (which means we have the location!) we are doing some more processing in this function like: getting the result from this callback, making an ajax call to _Google Maps API_ to get our location name. The function is defined as follows:
-```
+```javascript
 function locationSuccessCallback(pos){
   // Build the long/lat coords
   var lat = pos.coords.latitude;
@@ -203,11 +203,11 @@ function locationSuccessCallback(pos){
 }
 ```
 The callback sends us a parameter with the _longitude and latitude_. We are using those two coordinates to make a request to Google Maps API via an Ajax call. When the call succeeds, we parse the response and create a new object (dictionary) where we put our _KEY defined in the C app_ as being the key of the object, and the parsed content from google as being the VALUE of that key in the object. Then, we push this information to the watch by calling:
-```
+```javascript
 Pebble.sendAppMessage(dictionary, function(){console.log("Location sent");}, function(){console.log("failed");});
 ```
 This function call, sends our dictionary to our `C` app handler: 
-```
+```c
 static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 ```
 This handler has been explained on top: Pushes the new value of the key to the TextLayer and displays it on the watch screen.
