@@ -38,7 +38,7 @@ static void main_window_unload(Window *window){
 static void inbox_received_callback(DictionaryIterator *iterator, void *context){
   Tuple *t = dict_read_first(iterator); // Get first dictionary value
   // Create a new buffer for the location string
-  static char location_buffer[32];
+  static char location_buffer[200];
   // Iterate troughout the dictionary values
   while(t != NULL){
     switch(t->key){
