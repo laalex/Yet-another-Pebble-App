@@ -1,0 +1,29 @@
+{
+    "appKeys": {
+        "KEY_APISTRING": 0
+    },
+    "capabilities": [
+        "location",
+        "configurable"
+    ],
+    "companyName": "contact@alexandrulamba.com",
+    "longName": "HereAmI",
+    "projectType": "native",
+    "resources": {
+        "media": [
+            {
+                "file": "images/icon_app_pebble.png",
+                "menuIcon": true,
+                "name": "MENU_ICON",
+                "type": "png"
+            }
+        ]
+    },
+    "shortName": "HereAmI",
+    "uuid": "76013f0a-b40e-4b11-a9fe-4a59fc787a28",
+    "versionCode": 1,
+    "versionLabel": "1.1",
+    "watchapp": {
+        "watchface": false
+    }
+}
