@@ -12,7 +12,11 @@ How it works?
 In this section I will explain how the pebble application works and exemplify with bits of code so you can better understand how to create pebble apps
 
 
-Bugs / TODO
-=======
+### TODO
 
-- currently the address date buffer is only 32 bits long and it trims the address (bug)
+- gestures controls for refreshing location, etc
+- implementing viber (vibration)
+- implementing icons and menus
+- implementing compass
+- a counter to see how many times you've gone into some locations
+- a "save location" function to  the locations you've been and want to save
